@@ -1,0 +1,11 @@
+name = "UpdatableCholeskyFactorizations"
+uuid = "1a1c1746-0e7b-45d0-811e-72e8bb59686c"
+authors = ["Sebastian Ament <sebastianeament@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+julia = "1.6"
