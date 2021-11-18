@@ -6,9 +6,8 @@ using LinearAlgebra: checksquare
 export UpdatableCholesky, UCholesky,
        updatable_cholesky, ucholesky,
        updatable_cholesky!, ucholesky!,
-       add_column!, add_row!, addcol!, addrow!,
-       remove_column!, remove_row!, remcol!, remrow!
-
+       add_column!, addcol!,
+       remove_column!, remcol!
 
 # IDEA: have separate package PermutationMatrices.jl,
 # where we take care of all the permutation logic
@@ -29,6 +28,7 @@ and pre-allocates an `m x m` matrix for future additions to the matrix (defaults
 """
 function updatable_cholesky(A::AbstractMatrix, m::Int = 2size(A, 1); check::Bool = true)
     n = checksquare(A)
+    m ≥ n || throw(DimensionMismatch("$m < size(A, 1) == $n"))
     U_full = zeros(eltype(A), m, m)
     @. U_full[1:n, 1:n] = A
     updatable_cholesky!(U_full, n, check = check)
@@ -70,7 +70,8 @@ Base.eltype(F::UpdatableCholesky{T}) where T = T
 Base.size(F::UpdatableCholesky) = (F.n, F.n)
 Base.size(F::UpdatableCholesky, i::Int) = i > 2 ? 1 : size(F)[i]
 Base.AbstractMatrix(F::UpdatableCholesky) = Matrix(F)
-LinearAlgebra.issuccess(F::UpdatableCholesky) = info == 0
+Base.adjoint(C::UpdatableCholesky) = C # since it is Hermitian
+LinearAlgebra.issuccess(C::UpdatableCholesky) = C.info == 0
 function Base.Matrix(F::UpdatableCholesky)
     U = F.U
     U'U
@@ -80,6 +81,11 @@ function Base.copy(F::UpdatableCholesky)
     UpdatableCholesky(copy(F.U_full), F.n, F.info)
 end
 
+# linear solves with updatable cholesky
+LinearAlgebra.:\(C::UpdatableCholesky, x::AbstractVector) = ldiv!(C, copy(x))
+LinearAlgebra.:\(C::UpdatableCholesky, X::AbstractMatrix) = ldiv!(C, copy(X))
+LinearAlgebra.:/(X::AbstractMatrix, C::UpdatableCholesky) = rdiv!(copy(X), C)
+LinearAlgebra.rdiv!(X::AbstractMatrix, F::UpdatableCholesky) = ldiv!(F, X')'
 function LinearAlgebra.ldiv!(F::UpdatableCholesky, x::AbstractVecOrMat)
     U = F.U
     ldiv!(U', x)
@@ -115,8 +121,6 @@ function add_column!(C::UpdatableCholesky, A::AbstractMatrix)
     C.n = new_n
     return C
 end
-add_row!(C::UpdatableCholesky, A) = addrowcol!(C, A')
-
 function add_column!(C::UpdatableCholesky, a::AbstractVector)
     add_column!(C, reshape(a, :, 1))
 end
@@ -152,13 +156,9 @@ function remove_column!(C::UpdatableCholesky, i::Int)
     C.n -= 1
     return C
 end
-remove_row!(C::UpdatableCholesky, i::Int) = remove_column!(C, i)
 
 const addcol! = add_column!
-const addrow! = add_row!
-
 const remcol! = remove_column!
-const remrow! = remove_row!
 
 """
 ```
@@ -170,7 +170,7 @@ is requested to accomodate future column additions, if we don't have enough spac
 to add `A`.
 """
 function ensure_enough_memory!(C::UpdatableCholesky, A::AbstractMatrix, memory_expansion_factor::Int = 2)
-    if size(C.U_full, 1) ≤ size(A, 2) # create a bigger U_full, and store it in C.U_full
+    if size(C.U_full, 1) < C.n + size(A, 2) # create a bigger U_full, and store it in C.U_full
         n = C.n
         m = memory_expansion_factor * n # new size
         U_full = zeros(eltype(C), m, m)

@@ -1,4 +1,7 @@
 # UpdatableCholeskyFactorizations.jl
+[![CI](https://github.com/SebastianAment/UpdatableCholeskyFactorizations.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SebastianAment/UpdatableCholeskyFactorizations.jl/actions/workflows/CI.yml)
+[![codecov](https://codecov.io/gh/SebastianAment/UpdatableCholeskyFactorizations.jl/branch/main/graph/badge.svg?token=8L49I28I73)](https://codecov.io/gh/SebastianAment/UpdatableCholeskyFactorizations.jl)
+
 This package contains implementations of efficient representations and updating algorithms for Cholesky factorizations.
 Compared to constructing Cholesky factorizations from scratch, this package can lead to significant speed improvements, see the benchmarks below.
 
