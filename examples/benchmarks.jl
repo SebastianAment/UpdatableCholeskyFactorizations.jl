@@ -17,9 +17,9 @@ set = @benchmarkset "updatable cholesky" begin # for n in 1:16 IDEA: could have 
     @case "$n by $n cholesky" cholesky($A)
     @case "$(2n) by $(2n) cholesky" cholesky($A_full)
     @case "$n by $n updatable_cholesky" updatable_cholesky($A)
-    @case "adding vector to $n by $n updatable_cholesky"  add_column!(D, $a) setup=(D=copy($C))
-    @case "adding $m vectors to $n by $n updatable_cholesky"  add_column!(D, $Bm) setup=(D=copy($C))
-    @case "adding $n x $n matrix to $n by $n updatable_cholesky" add_column!(D, $B) setup=(D=copy($C))
+    @case "adding vector to $n by $n UpdatableCholesky" add_column!(D, $a) setup=(D=copy($C))
+    @case "adding $m vectors to $n by $n UpdatableCholesky" add_column!(D, $Bm) setup=(D=copy($C))
+    @case "adding $n x $n matrix to $n by $n UpdatableCholesky" add_column!(D, $B) setup=(D=copy($C))
 end
 
 result = run(set)

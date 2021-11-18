@@ -92,7 +92,7 @@ end
 add_column!(C::UpdatableCholesky, A::AbstractMatrix)
 ```
 appending columns in A - and their corresponding rows A' - to `UpdatableCholesky`
- factorization `C`. Complexity is `O(m³)` where `m = size(A, 2)`.
+ factorization `C`. Complexity is `O(m³ + n²m)` where `n = size(C, 1)` and `m = size(A, 2)`.
 """
 function add_column!(C::UpdatableCholesky, A::AbstractMatrix)
     ensure_enough_memory!(C, A)
@@ -105,13 +105,13 @@ function add_column!(C::UpdatableCholesky, A::AbstractMatrix)
     A22 = @view A[n+1:end, :]
 
     S12 = @view C.U_full[1:n, n+1:new_n]
-    ldiv!(S12, C.U', A12)
+    ldiv!(S12, C.U', A12) # this is squared in the number of old indices and linear in m: O(n²m)
 
     # S22 = cholesky!(A22 - S12' * S12).U
     S22 = @view C.U_full[n+1:new_n, n+1:new_n]
     @. S22 = A22
     mul!(S22, S12', S12, -1, 1)
-    C22 = cholesky!(S22) # this is cubic in the number of new indices only
+    C22 = cholesky!(S22) # this is cubic in the number of new indices only `O(m³)`
     C.n = new_n
     return C
 end
@@ -126,7 +126,7 @@ end
 remove_column!(C::UpdatableCholesky, i::Int)
 ```
 updating `UpdatableCholesky` factorization `C` corresponding to removal of the
-ith row and column of the original matrix. Complexity is `O(m²)`.
+`i`th row and column of the original matrix. Complexity is `O(n²)`.
 """
 function remove_column!(C::UpdatableCholesky, i::Int)
     n = C.n
