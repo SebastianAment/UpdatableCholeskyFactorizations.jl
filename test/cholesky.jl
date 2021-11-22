@@ -6,9 +6,9 @@ using Test
 @testset "updating Cholesky" begin
     element_types = (Float32, Float64, ComplexF32, ComplexF64)
     for elty in element_types
-        n = 8
+        n = 4
         A_full = randn(elty, 2n, 2n)
-        A_full = A_full'A_full
+        A_full = A_full'A_full + I # adding diagonal for numerical stability with low-precision floats
         A = A_full[1:n, 1:n]
 
         UC = updatable_cholesky(A)
