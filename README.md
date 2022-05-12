@@ -38,7 +38,7 @@ using UpdatableCholeskyFactorizations
 # setting up 
 n = 128
 m = 16
-A_full = randn(elty, 2n, 2n)
+A_full = randn(2n, 2n)
 A_full = A_full'A_full
 A = @view A_full[1:n, 1:n]
 a = @view A_full[1:n+1, n+1]
