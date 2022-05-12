@@ -48,6 +48,11 @@ using Test
         @test C2.info == C.info
         @test size(C2) == size(C)
 
+        # conversion from cholesky type
+        UC2 = updatable_cholesky(C2)
+        @test UC2 isa UpdatableCholesky
+        @test UC2.U ≈ C2.U
+
         # adding rows and columns
         for i in 1:n
             ai = @view A_full[1:n+i, n+i]

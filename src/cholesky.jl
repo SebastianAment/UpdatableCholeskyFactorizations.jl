@@ -32,14 +32,25 @@ function updatable_cholesky!(U_full::AbstractMatrix, n::Int; check::Bool = true)
     m = checksquare(U_full)
     A = @view U_full[1:n, 1:n]
     C = cholesky!(A, check = check)
-    @. U_full[1:n, 1:n] = C.U
     UpdatableCholesky(U_full, n, C.info)
 end
 const ucholesky! = updatable_cholesky!
 
-# constructing
+# constructing cholesky from UpdatableCholesky
 function LinearAlgebra.Cholesky(F::UpdatableCholesky)
     Cholesky(F.U, :U, F.info)
+end
+
+# converting Cholesky factorization to UpdatableCholesky
+function UpdatableCholeskyFactorizations.updatable_cholesky(C::Union{Cholesky, CholeskyPivoted}, m::Int = size(C, 1); check::Bool = true)
+	U_full = zeros(eltype(C), m, m) # in principle, could do this in place
+	n = size(C, 1)
+	U = C.U
+	if C isa CholeskyPivoted
+		U = @view C.U[:, invperm(C.p)]
+	end
+	@. U_full[1:n, 1:n] = U
+	UpdatableCholesky(U_full, n, C.info)
 end
 
 function Base.getproperty(F::UpdatableCholesky, s::Symbol)
