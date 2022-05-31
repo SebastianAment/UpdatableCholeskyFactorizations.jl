@@ -42,7 +42,7 @@ function LinearAlgebra.Cholesky(F::UpdatableCholesky)
 end
 
 # converting Cholesky factorization to UpdatableCholesky
-function UpdatableCholeskyFactorizations.updatable_cholesky(C::Union{Cholesky, CholeskyPivoted}, m::Int = size(C, 1); check::Bool = true)
+function updatable_cholesky(C::Union{Cholesky, CholeskyPivoted}, m::Int = size(C, 1); check::Bool = true)
 	U_full = zeros(eltype(C), m, m) # in principle, could do this in place
 	n = size(C, 1)
 	U = C.U
@@ -52,6 +52,12 @@ function UpdatableCholeskyFactorizations.updatable_cholesky(C::Union{Cholesky, C
 	@. U_full[1:n, 1:n] = U
 	UpdatableCholesky(U_full, n, C.info)
 end
+
+# fall-back for arbitrary factorization object
+function updatable_cholesky(F::Factorization, m::Int = size(F, 1); check::Bool = true)
+	updatable_cholesky(Hermitian(Matrix(F)), m, check = check)
+end
+
 
 function Base.getproperty(F::UpdatableCholesky, s::Symbol)
     if s == :U

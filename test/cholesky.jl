@@ -49,9 +49,13 @@ using Test
         @test size(C2) == size(C)
 
         # conversion from cholesky type
+        # TODO: test for CholeskyPivoted
         UC2 = updatable_cholesky(C2)
         @test UC2 isa UpdatableCholesky
         @test UC2.U ≈ C2.U
+
+        # testing constructor with arbitrary factorization input
+        @test Matrix(updatable_cholesky(qr(A))) ≈ A
 
         # adding rows and columns
         for i in 1:n

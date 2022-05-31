@@ -1,7 +1,7 @@
 name = "UpdatableCholeskyFactorizations"
 uuid = "1a1c1746-0e7b-45d0-811e-72e8bb59686c"
 authors = ["Sebastian Ament <sebastianeament@gmail.com>"]
-version = "1.1.0"
+version = "1.1.1"
 
 [deps]
 LazyInverses = "9f18896c-49a9-43cc-8eef-c455a8a119c6"
